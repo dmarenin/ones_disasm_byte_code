@@ -1,5 +1,8 @@
 from op_codes import list as op_codes
 from op_codes import list_loc as list_loc
+from op_codes import sys_call_flags as sys_call_flags
+from op_codes import meta_type_proc as meta_type_proc
+
 import re
 
 def print_op_code():
@@ -52,9 +55,43 @@ def read_section_proc(sec):
                 i += 1
 
         result['list_proc'].append(proc)
-        result['pointer_cmd'][int(proc['num_sec_cmd'])] = proc
+        if not proc_is_sys_call(proc_str[1]):
+            result['pointer_cmd'][int(proc['num_sec_cmd'])] = proc
 
     return result
+
+def read_section_const(sec):
+    result = []
+    
+    sec_list = re.split(r'[\n]', sec)
+    
+    for x in sec_list:
+        x = x.replace('{', '')
+        x = x.replace('},', '')
+        
+        result.append({'value': x[4:], 'type': x[0:3]})
+
+    return result
+
+def read_section_var(sec):
+    result = []
+    
+    sec_list = re.split(r'[\n]', sec)
+    
+    for x in sec_list:
+        x = x.replace('{', '')
+        x = x.replace('},', '')
+
+        x = x.split(',')
+        if len(x) != 3:
+            continue
+        
+        result.append({'value': x[0], 'par1': x[1], 'par2': x[2]})
+
+    return result
+
+def proc_is_sys_call(flag):
+    return int(flag) in sys_call_flags
 
 def get_list_xref(sec):
     result = {}
@@ -66,18 +103,15 @@ def get_list_xref(sec):
 
     return result
 
-if __name__ == "__main__":
-    #print_op_code()
-
-    from test_section_cmd import section_cmd as sec_cmd
-    from test_section_proc import section_proc as sec_proc
-
-    section_cmd = read_section_cmd(sec_cmd)
-    section_proc = read_section_proc(sec_proc)
-    section_const = None
-    section_var = None
+def disasm(**data):
+    section_cmd = read_section_cmd(data['sec_cmd'])
+    section_proc = read_section_proc(data['sec_proc'])
+    section_const = read_section_const(data['sec_const'])
+    section_var = read_section_var(data['sec_var'])
 
     list_xref = get_list_xref(section_cmd)
+
+    lines = []
 
     for x in section_cmd:
         n = str(x['n']).rjust(8, '0')
@@ -86,28 +120,91 @@ if __name__ == "__main__":
         
         proc = section_proc['pointer_cmd'].get(x['n'])
 
+        line = ''
+
         if not proc is None:
-            print(f""".cmd:{n}; =============== S U B R O U T I N E =======================================""")
-            print(f""".cmd:{n}""")
-            print(f""".cmd:{n} proc type={proc['type_proc']} type2={proc['type_proc2']}""")
-            print(f""".cmd:{n} {proc['name_proc']}""")
+            type_proc = int(proc['type_proc'])
+
+            type_proc = meta_type_proc.get(type_proc)
+
+            line += f""".cmd:{n}; =============== S U B R O U T I N E =======================================\n"""
+
+            line += f""".cmd:{n};flags: {proc['type_proc']}, {proc['type_proc2']}\n"""
+            line += f""".cmd:{n}\n"""
+            line += f""".cmd:{n} {type_proc['meta_type']}\n"""
+            line += f""".cmd:{n} {proc['name_proc']} {type_proc['dir_proc']}\n"""
+            line += f""".cmd:{n}\n"""
 
             for index, item in enumerate(proc['par_proc']):
-                 print(f""".cmd:{n} arg{index} = {item}""")
+                 line += f""".cmd:{n} arg{index} = {item}\n"""
 
-            print(f""".cmd:{n}""")
+            line += f""".cmd:{n} \n"""
 
         xref = list_xref.get(x['n'])
         if not xref is None:
-            print(f""".cmd:{n} {xref}""")
+            line += f""".cmd:{n} {xref}\n"""
 
         if x['op'] == 'Call':
             proc = section_proc['list_proc'][int(x['p'])]
             p = proc['name_proc']
 
-        print(f""".cmd:{n}            {op} {p}    ;[{x['op_raw']}, {x['p_raw']}]""")
+            type_proc = proc['type_proc']
+
+            if proc_is_sys_call(type_proc):
+                p = 'sys call: ' + p
+        
+        elif x['op'] == 'PushConst':
+            value = section_const[int(p)]['value'] 
+            #p = f"""{p} ; {value} """ 
+            p = f"""{value} ; {p} """ 
+
+        elif x['op'] == 'New':
+            value = section_const[int(p)]['value'] 
+            #p = f"""{p} ; Новый {value}""" 
+            p = f"""Новый {value} ; {p} """ 
+        
+        elif x['op'] == 'CallObjectProcedure':
+            value = section_const[int(p)]['value'] 
+            #p = f"""{p} ; {value}""" 
+            p = f"""{value} ; {p} """ 
+        
+        elif x['op'] == 'CallObjectFunction':
+            value = section_const[int(p)]['value'] 
+            #p = f"""{p} ; {value}""" 
+            p = f"""{value} ; {p} """ 
+
+        elif x['op'] == 'PushStatic':
+            value = section_var[int(p)]['value'] 
+            #p = f"""{p} ; {value}""" 
+            p = f"""{value} ; {p} """ 
+
+        line += f""".cmd:{n}            {op} {p}          """
+        #line += f"""[{x['op_raw']}, {x['p_raw']}] \n"""
+
+        line += """\n""" 
+
+        lines.append(line)
 
 
+    return lines
 
+
+if __name__ == "__main__":
+    #print_op_code()
+
+    from test_section_cmd import section_cmd as sec_cmd
+    from test_section_proc import section_proc as sec_proc
+    from test_section_const import section_const as sec_const
+    from test_section_var import section_var as sec_var
+    
+    lines = disasm(sec_cmd=sec_cmd, sec_proc=sec_proc, sec_const=sec_const, sec_var=sec_var)
+
+    f = open('result.txt', 'w', encoding='utf-8')
+
+    for line in lines:
+        f.write(line)
+    
+    f.close()
+    
     print("")
 
