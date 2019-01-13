@@ -25,6 +25,16 @@
     <Compile Include="start.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="test_section_proc.py" />
+    <Compile Include="test_section_cmd.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="test_module_full.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="result.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
 </Project>
