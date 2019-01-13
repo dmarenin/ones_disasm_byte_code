@@ -1,27 +1,5 @@
 list = {
 
-             -22: 'IfSimple',
-             -21: 'IfSimpleEndIf',
-             -20: 'ContinueLabel',
-             -19: 'Continue',
-             -18: 'BreakLabel',
-             -17: 'Break',
-             -16: 'While',
-             -15: 'WhileEndDo',
-             -14: 'If',
-             -13: 'ElsIf',
-             -12: 'Else',
-             -11: 'EndIf',
-             -10: 'For',
-              -9: 'ForEndDo',
-              -8: 'ForEach',
-              -7: 'ForEachIn',
-              -6: 'ForEachEndDo',
-              -5: 'Catch',
-              -4: 'ReturnProc',
-              -3: 'ReturnFunc',
-              -2: 'InlineIfThen',
-              -1: 'NOPInternal',
                0: 'Nop',
                1: 'LineNo',
                2: 'PushStatic',
@@ -153,4 +131,6 @@ list = {
              128: 'ErrorInfo'
              
         }
+
+list_loc = ['Jmp', 'JZ', 'JNZ', 'JmpLbl', 'AndJmp', 'OrJmp']
 
