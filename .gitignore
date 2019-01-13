@@ -1,2 +1,5 @@
-
+*.suo
 *.pyc
+*.sln
+*.pyproj
+.vs/ones_disasm_byte_code/v15/.suo
