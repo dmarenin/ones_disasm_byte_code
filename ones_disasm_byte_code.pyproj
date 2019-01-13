@@ -25,6 +25,8 @@
     <Compile Include="start.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="test_section_var.py" />
+    <Compile Include="test_section_const.py" />
     <Compile Include="test_section_proc.py" />
     <Compile Include="test_section_cmd.py">
       <SubType>Code</SubType>
