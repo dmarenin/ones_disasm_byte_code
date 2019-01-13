@@ -112,7 +112,10 @@ def disasm(**data):
     list_xref = get_list_xref(section_cmd)
 
     lines = []
-
+    
+    line = f"""section .cmd\n"""
+    lines.append(line)
+    
     for x in section_cmd:
         n = str(x['n']).rjust(8, '0')
         op = x['op'].ljust(20, ' ')
@@ -151,32 +154,32 @@ def disasm(**data):
             type_proc = proc['type_proc']
 
             if proc_is_sys_call(type_proc):
-                p = 'sys call: ' + p
+                p = 'sys_call: ' + p
         
         elif x['op'] == 'PushConst':
             value = section_const[int(p)]['value'] 
             #p = f"""{p} ; {value} """ 
-            p = f"""{value} ; {p} """ 
+            p = f"""{value} ; .const*{p} """ 
 
         elif x['op'] == 'New':
             value = section_const[int(p)]['value'] 
             #p = f"""{p} ; Новый {value}""" 
-            p = f"""Новый {value} ; {p} """ 
+            p = f"""Новый {value} ; .const*{p} """ 
         
         elif x['op'] == 'CallObjectProcedure':
             value = section_const[int(p)]['value'] 
             #p = f"""{p} ; {value}""" 
-            p = f"""{value} ; {p} """ 
+            p = f"""{value} ; .const*{p} """ 
         
         elif x['op'] == 'CallObjectFunction':
             value = section_const[int(p)]['value'] 
             #p = f"""{p} ; {value}""" 
-            p = f"""{value} ; {p} """ 
+            p = f"""{value} ; .const*{p} """ 
 
         elif x['op'] == 'PushStatic':
             value = section_var[int(p)]['value'] 
             #p = f"""{p} ; {value}""" 
-            p = f"""{value} ; {p} """ 
+            p = f"""{value} ; .var*{p} """ 
 
         line += f""".cmd:{n}            {op} {p}          """
         #line += f"""[{x['op_raw']}, {x['p_raw']}] \n"""
@@ -185,7 +188,41 @@ def disasm(**data):
 
         lines.append(line)
 
+    line = f"""section .const\n"""
+    lines.append(line)
 
+    for index, item in enumerate(section_const):
+        n = str(index).rjust(8, '0')
+      
+        line = f""".const:{n} {item['value']} ; type = {item['type']}\n"""
+
+        lines.append(line)
+    
+    line = f"""section .var:\n"""
+    lines.append(line)   
+    
+    for index, item in enumerate(section_var):
+        n = str(index).rjust(8, '0')
+      
+        line = f""".var:{n} {item['value']} ; {item['par1']}, {item['par1']}\n"""
+
+        lines.append(line)
+    
+    line = f"""section .proc:\n"""
+    lines.append(line)   
+    
+    for index, item in enumerate(section_proc['list_proc']):
+        n = str(index).rjust(8, '0')
+      
+        par_proc = ''
+        for x in item['par_proc']:
+            par_proc += x
+            par_proc += ', '
+
+        line = f""".proc:{n} name = {item['name_proc']}; args = {par_proc} \n"""
+
+        lines.append(line)    
+              
     return lines
 
 
