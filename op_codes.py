@@ -1,6 +1,4 @@
-list = {
-
-               0: 'Nop',
+list = {0: 'Nop',
                1: 'LineNo',
                2: 'PushStatic',
                3: 'PushLocal',
@@ -128,9 +126,14 @@ list = {
              125: 'RmvHndlr',
              126: 'RmvObjHndlr',
              127: 'Title',
-             128: 'ErrorInfo'
-             
-        }
+             128: 'ErrorInfo'}
 
 list_loc = ['Jmp', 'JZ', 'JNZ', 'JmpLbl', 'AndJmp', 'OrJmp']
+
+sys_call_flags = [32, 33]
+
+meta_type_proc = {17:{'dir_proc':' Экспорт ', 'meta_type': 'Функция'},
+                  0:{'dir_proc':'  ', 'meta_type': 'Процедура'},
+                  1:{'dir_proc':'  ', 'meta_type': 'Процедура'},
+                  16:{'dir_proc':' Экспорт ', 'meta_type': 'Процедура'}}
 
