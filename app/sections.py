@@ -5,10 +5,7 @@ from op_codes import meta_type_proc as meta_type_proc
 
 import re
 
-def print_op_code():
-    print(op_codes)
-
-def read_section_cmd(sec):
+def read_cmd(sec):
     result = []
     n = 0
     
@@ -22,7 +19,7 @@ def read_section_cmd(sec):
 
     return result
 
-def read_section_proc(sec):
+def read_proc(sec):
     result = {'list_proc': [],
               'pointer_cmd': {}
               }
@@ -63,7 +60,7 @@ def read_section_proc(sec):
 
     return result
 
-def read_section_const(sec):
+def read_const(sec):
     result = []
     
     sec_list = re.split(r'[\n]', sec)
@@ -76,7 +73,7 @@ def read_section_const(sec):
 
     return result
 
-def read_section_var(sec):
+def read_var(sec):
     result = []
     
     sec_list = re.split(r'[\n]', sec)
@@ -106,11 +103,12 @@ def get_list_xref(sec):
 
     return result
 
+
 def disasm(**data):
-    section_cmd = read_section_cmd(data['sec_cmd'])
-    section_proc = read_section_proc(data['sec_proc'])
-    section_const = read_section_const(data['sec_const'])
-    section_var = read_section_var(data['sec_var'])
+    section_cmd = read_cmd(data['sec_cmd'])
+    section_proc = read_proc(data['sec_proc'])
+    section_const = read_const(data['sec_const'])
+    section_var = read_var(data['sec_var'])
 
     list_xref = get_list_xref(section_cmd)
 
@@ -189,9 +187,9 @@ def disasm(**data):
         #    #p = f"""{p} ; {value}""" 
         #    p = f"""{value} ; .var*{p} """ 
 
-        elif x['op'] == 'LineNo':
-            p = f"""{op} ; .var*{p} """
-            op = ' '
+        #elif x['op'] == 'LineNo':
+        #    p = f"""{op} ; .var*{p} """
+        #    op = ' '
 
         line += f""".cmd:{n}            {op} {p}          """
         #line += f"""[{x['op_raw']}, {x['p_raw']}] \n"""
@@ -236,31 +234,4 @@ def disasm(**data):
         lines.append(line)    
               
     return lines
-
-
-if __name__ == "__main__":
-    #print_op_code()
-
-    #from test1.test_section_cmd import section_cmd as sec_cmd
-    #from test1.test_section_proc import section_proc as sec_proc
-    #from test1.test_section_const import section_const as sec_const
-    #from test1.test_section_var import section_var as sec_var
-    
-    #f = open('test1\\result.txt', 'w', encoding='utf-8')
-    
-    from test2.test_section_cmd import section_cmd as sec_cmd
-    from test2.test_section_proc import section_proc as sec_proc
-    from test2.test_section_const import section_const as sec_const
-    from test2.test_section_var import section_var as sec_var
-    
-    f = open('test2\\result.txt', 'w', encoding='utf-8') 
-    
-    lines = disasm(sec_cmd=sec_cmd, sec_proc=sec_proc, sec_const=sec_const, sec_var=sec_var)
-
-    for line in lines:
-        f.write(line)
-    
-    f.close()
-    
-    print("")
 
