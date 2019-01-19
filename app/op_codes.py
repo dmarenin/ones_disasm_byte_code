@@ -128,7 +128,9 @@ list = {0: 'Nop',
              127: 'Title',
              128: 'ErrorInfo'}
 
-list_loc = ['Jmp', 'JZ', 'JNZ', 'JmpLbl', 'AndJmp', 'OrJmp']
+#list_loc = ['Jmp', 'JZ', 'JNZ', 'JmpLbl', 'AndJmp', 'OrJmp']
+
+list_loc = ['Jmp', 'JZ', 'JNZ']
 
 sys_call_flags = [32, 33]
 

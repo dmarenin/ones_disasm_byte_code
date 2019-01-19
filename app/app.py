@@ -2,6 +2,7 @@ import os
 import eel
 
 import json
+from operator import itemgetter
 
 import sections
 
@@ -28,62 +29,56 @@ def handleinput(x):
 
         lines = sections.disasm(sec_cmd=sec_cmd, sec_proc=sec_proc, sec_const=sec_const, sec_var=sec_var)
 
+        size = 3500
+        color = "#003030"
+        font = {'color': '#ffffff', 'face': 'monospace', 'align': 'left'}
+        shape = 'box'
+        
         nodes = []
         edges = []
 
-        d = None
-        for l in lines:
-            line += l
+        stack = None
+        for index, l in enumerate(lines):
 
             if '= S U B R O U T I N E =' in l:
-                if not d is None:
-                    nodes.append(d)
+                if not stack is None:
+                    nodes.append(stack)
+                    edges.append({'from': stack['id'], 'to': l[5:13], 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier', 'enabled': False}})
 
-                d = {}
-                d['id'] = l[4:15]
-                d['size'] = 150
-                d['label'] = l
-                d['color'] = "#003030"
-                d['shape'] = 'box'
-                d['font'] = {'color': '#ffffff', 'face': 'monospace', 'align': 'left'}
+                stack = {'id': l[5:13], 'size': size, 'label': l, 'color': color, 'shape': shape, 'font': font}
+
+            elif l[14:17]=='loc':
+                nodes.append(stack)
+               
+                if last_op == 'Jmp':
+                    edges.append({'to': stack['id'], 'from': lines[index-1][50:61].rstrip().rjust(8, '0'), 'arrows': 'from', 'physics': False, 'smooth': {'type': 'cubicBezier', 'enabled': False}})
+                else:
+                    edges.append({'from': stack['id'], 'to': l[5:13], 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier', 'enabled': False}})
                 
-            if not d is None:
-                  d['label'] = d['label'] + l
-            #if 'Ret' in l:
-            #    nodes.append(d)
+                stack = {'id': l[5:13], 'size': size, 'label': l, 'color': color, 'shape': shape, 'font': font}
+            
+            elif l[25:27]=='JZ' or l[25:28]=='JNZ':
+                stack['label'] = stack['label'] + l
+                nodes.append(stack)
+                edges.append({'from': stack['id'], 'to': l[50:61].rstrip().rjust(8, '0'), 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier', 'enabled': False}})
+                edges.append({'from': stack['id'], 'to': lines[index+1][5:13], 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier', 'enabled': False}})
+
+                stack = {'id': lines[index+1][5:13], 'size': size, 'label': '', 'color': color, 'shape': shape, 'font': font}
+
+            elif not stack is None:
+                stack['label'] = stack['label'] + l
+
+            last_op = l[25:28]
 
 
+        edges = sorted(edges, key=lambda k: k['from']) 
+        edges = sorted(edges, key=lambda k: k['to']) 
 
-
-#        edges = [
-#{'from': "cfg_0x00405a2e", 'to': "cfg_0x00405a39", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00405a2e", 'to': "cfg_0x00405a49", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00405a49", 'to': "cfg_0x00405a4e", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00405a49", 'to': "cfg_0x00405a62", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00405a55", 'to': "cfg_0x00405a5f", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00405a55", 'to': "cfg_0x004095c6", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x004095c6", 'to': "cfg_0x00417563", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00405a39", 'to': "cfg_0x00403450", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00405a39", 'to': "cfg_0x00405a49", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00403450", 'to': "cfg_0x00403489", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00403450", 'to': "cfg_0x0042f03f", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00405a4e", 'to': "cfg_0x00405a55", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00405a4e", 'to': "cfg_0x00405a62", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#{'from': "cfg_0x00405a5f", 'to': "cfg_0x00405a62", 'arrows': 'to', 'physics': False, 'smooth': {'type': 'cubicBezier'}},
-#];
-
+        nodes = sorted(nodes, key=lambda k: k['id']) 
 
         data = {'edges':edges, 'nodes':nodes}
 
         eel.post(json.dumps(data)) 
         
-        #line = ''
-
-        #for l in sec_proc:
-        #    line += l
-        
-        #eel.post2(line) 
-
-
     print('%s' % x)
 

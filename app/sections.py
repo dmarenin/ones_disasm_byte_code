@@ -98,6 +98,9 @@ def get_list_xref(sec):
 
     for x in sec:
         if x['op'] in list_loc:
+            #if int(x['p'])==int(x['n'])+1:
+            #    continue
+
             result[int(x['p'])] = 'loc_'+x['p']
             x['p'] = 'loc_'+x['p']
 
@@ -154,7 +157,7 @@ def disasm(**data):
             type_proc = proc['type_proc']
 
             if proc_is_sys_call(type_proc):
-                p = f"""{p} ; sys_call{proc['name_proc']} .proc[+{p}]""" 
+                p = f"""{p} ; sys_call_{proc['name_proc']} .proc[+{p}]""" 
             else:
                 p = f"""{p} ; {proc['name_proc']} .proc[+{p}]""" 
         
