@@ -150,42 +150,38 @@ def disasm(**data):
 
         if x['op'] == 'Call':
             proc = section_proc['list_proc'][int(x['p'])]
-            p = proc['name_proc']
 
             type_proc = proc['type_proc']
 
             if proc_is_sys_call(type_proc):
-                p = 'sys_call: ' + p
+                p = f"""{p} ; sys_call{proc['name_proc']} .proc[+{p}]""" 
+            else:
+                p = f"""{p} ; {proc['name_proc']} .proc[+{p}]""" 
         
         elif x['op'] == 'PushConst':
             value = section_const[int(p)]['value'] 
-            #p = f"""{p} ; {value} """ 
-            p = f"""{value} ; .const*{p} """ 
+            p = f"""{p} ; {value} .const[+{p}]""" 
 
         elif x['op'] == 'New':
             value = section_const[int(p)]['value'] 
-            #p = f"""{p} ; Новый {value}""" 
-            p = f"""Новый {value} ; .const*{p} """ 
+            p = f"""{p} ; Новый {value} .const[+{p}]""" 
+            #p = f"""Новый {value} ; .const*{p} """ 
         
         elif x['op'] == 'CallObjectProcedure':
             value = section_const[int(p)]['value'] 
-            #p = f"""{p} ; {value}""" 
-            p = f"""{value} ; .const*{p} """ 
+            p = f"""{p} ; {value} .const[+{p}]""" 
        
         elif x['op'] == 'GetObjectProperty':
             value = section_const[int(p)]['value'] 
-            #p = f"""{p} ; {value}""" 
-            p = f"""{value} ; .const*{p} """      
+            p = f"""{p} ; {value} .const[+{p}]"""  
         
         elif x['op'] == 'CallObjectFunction':
             value = section_const[int(p)]['value'] 
-            #p = f"""{p} ; {value}""" 
-            p = f"""{value} ; .const*{p} """ 
+            p = f"""{p} ; {value} .const[+{p}]""" 
 
-        #elif x['op'] == 'PushStatic':
-        #    value = section_var[int(p)]['value'] 
-        #    #p = f"""{p} ; {value}""" 
-        #    p = f"""{value} ; .var*{p} """ 
+        elif x['op'] == 'PushStatic':
+            value = section_var[int(p)]['value'] 
+            p = f"""{p} ; {value} .var[+{p}]""" 
 
         #elif x['op'] == 'LineNo':
         #    p = f"""{op} ; .var*{p} """

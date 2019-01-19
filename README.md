@@ -9,3 +9,5 @@ gen psedo-asm listing ones enterprise from byte code
 ![Image alt](https://github.com/dmarenin/ones_disasm_byte_code/blob/master/img/1.PNG)
 ![Image alt](https://github.com/dmarenin/ones_disasm_byte_code/blob/master/img/2.PNG)
 ![Image alt](https://github.com/dmarenin/ones_disasm_byte_code/blob/master/img/ice_video_20190114-203409.gif)
+![Image alt](https://github.com/dmarenin/ones_disasm_byte_code/blob/master/img/ice_video_20190119-114607.gif)
+
